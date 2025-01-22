@@ -1,5 +1,7 @@
 from typing import List
 import timeit
+import random
+import numpy as np
 
 
 # Task 1
@@ -53,17 +55,21 @@ assert std([1., 2., 3., 4.]) == 1.25**0.5
 #The median is the middle value in a sorted dataset. If the dataset has an odd number of values, the median is the value at the center. If the dataset has an even number of values, the median is the average of the two middle values.
 
 def median(li: List[float]) -> float:
-   if not li: 
-       raise ValueError('List is empty but should not')
-   sorted_li = sorted(li)
-   n = len(sorted_li)
-   mid = n // 2 
+    if not li:  
+        raise ValueError('List is empty but should not')
+    
+    if isinstance(li[0], list):  
+        flattened = [item for sublist in li for item in sublist]
+        return median(flattened)
 
+    sorted_li = sorted(li) 
+    n = len(sorted_li)
+    mid = n // 2  
 
-   if n % 2 == 1: 
-       return sorted_li[mid]
-   else: 
-       return (sorted_li[mid - 1] + sorted_li[mid]) / 2
+    if n % 2 == 1:  
+        return sorted_li[mid]
+    else:  
+        return (sorted_li[mid - 1] + sorted_li[mid]) / 2
 
 
 assert median([1., 1., 1.]) == 1.
@@ -77,10 +83,6 @@ assert median([1., 4., 3., 2.]) == 2.5
 
 # generate data for tests
 setup = '''
-import random
-import numpy as np
-
-
 arr = np.random.rand(10_000) * 100
 li = [random.random() * 100 for _ in range(10_000)]
 '''
@@ -117,20 +119,20 @@ stmt_median_np = 'np.median(arr)'
 # Task 6
 #Measure average exec time of your statements with `timeit` module. As your submission, fill out the table with results (rounded to 2 decimal places)
 
-time_mean_custom = timeit.timeit(stmt=stmt_mean_custom, setup=setup, globals=globals(), number=10_000)
-time_mean_np = timeit.timeit(stmt=stmt_mean_np, setup=setup, globals=globals(), number=10_000)
+def measure_execution_time(stmt, iterations=10_000):
+    return timeit.timeit(stmt=stmt, setup=setup, globals=globals(), number=iterations)
 
+time_mean_custom = measure_execution_time(stmt_mean_custom)
+time_mean_np = measure_execution_time(stmt_mean_np)
 
-time_var_custom = timeit.timeit(stmt=stmt_var_custom, setup=setup, globals=globals(), number=10_000)
-time_var_np = timeit.timeit(stmt=stmt_var_np, setup=setup, globals=globals(), number=10_000)
+time_var_custom = measure_execution_time(stmt_var_custom)
+time_var_np = measure_execution_time(stmt_var_np)
 
+time_std_custom = measure_execution_time(stmt_std_custom)
+time_std_np = measure_execution_time(stmt_std_np)
 
-time_std_custom = timeit.timeit(stmt=stmt_std_custom, setup=setup, globals=globals(), number=10_000)
-time_std_np = timeit.timeit(stmt=stmt_std_np, setup=setup, globals=globals(), number=10_000)
-
-
-time_median_custom = timeit.timeit(stmt=stmt_median_custom, setup=setup, globals=globals(), number=10_000)
-time_median_np = timeit.timeit(stmt=stmt_median_np, setup=setup, globals=globals(), number=10_000)
+time_median_custom = measure_execution_time(stmt_median_custom)
+time_median_np = measure_execution_time(stmt_median_np)
 
 
 print(f"{'Func':<10} {'Custom':<10} {'NumPy'}")
